@@ -19,5 +19,45 @@ db.init_app(app)
 def index():
     return "Index for Game/Review/User API"
 
+@app.route('/games')
+def games():
+    #Getting the data and putting it into a dictionary so that it works with jsonify, and appending to a list
+    #returning the list as a response.
+    games = []
+    for game in Game.query.all():
+        game_dict = {
+            "title": game.title,
+            "genre": game.genre,
+            "platform": game.platform,
+            "price": game.price,
+        }
+        games.append(game_dict)
+
+    response = make_response(
+        # jsonify(games),
+        games,
+        200,
+        #default Content-Type is Text/Html since in general web servers send HTML content to browsers
+        #but since were sending json data we'll change the content-type to json. If we use jsonify()
+        # then this would be unnecessary. 
+        {"Content-Type": "application/json"}
+    )
+
+    return response
+
+@app.route('/games/<int:id>')
+def game_by_id(id):
+    game = Game.query.filter(Game.id == id).first()
+
+    game_dict = game.to_dict()
+
+    response = make_response(
+        jsonify(game_dict),
+        200
+    )
+    response.headers["Content-Type"] = "application/json"
+
+    return response
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
